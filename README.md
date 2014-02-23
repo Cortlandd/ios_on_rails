@@ -229,18 +229,68 @@ And now you can use the route without extension and get JSON objects!
 Let's add our second model, called `Task` to our application:
 
 ```
-rails g scaffold title status:integer user_id:integer
+rails g scaffold task title completed:boolean user_id:integer
 ```
 
-Our `tasks` table will have a title, a status (if it's complete or not) and an user id. Note that every field that is not `string` should explicitly tell what is the type of data.
+Our `tasks` table will have a title, a completed field (if it's complete or not) and an user id. Note that every field that is not `string` should explicitly tell what is the type of data.
 
-Running that command we generate the same files we did when we scaffolded the `User` model
+Running that command we generate the same files we did when we scaffolded the `User` model. After this we must run the migration:
 
+```
+rake db:migrate
+```
+
+If you access `localhost:3000/tasks` you'll see that there is already the HTML views to interact with tasks like the ones for the `User`.
 
 ## The Rails console and Active Record ORM
+
+Active Record let's you
 
 #### Namespacing the API
 
 Our mobile application will only use the JSON routes to communicate. Usually you don't want to expose the same actions for frontend or backoffice HTML pages and the JSON API. That's where namespacing can help you out.
 
-Change the routes file to use `v1` as the namespace for the 
+Change the routes file to use `v1` as the namespace for the API routes, using JSON as the default format:
+
+```ruby
+  namespace 'v1', defaults: { format: 'json' } do
+    resources :tasks
+    resources :users
+  end
+```
+
+You can keep the other `resources` calls out of the namespace to use them like a rudimentary backoffice.
+
+Because we namespaced the resources we also have to namespace the controllers. We must create the 'v1' directory inside the controllers and make a copy of our controllers inside of it. The class name of the controllers should also be changed to have `V1::` before. We end up with `V1::TasksController` and `V1::UsersController`.
+
+Edit those controllers and delete everything that has to do with rendering stuff for HTML (because the API doesn't need it). We can also delete the edit and new methods because the "form" for creation will be on the mobile side. Since we can't check the "details" of each task we can also delete the show method.
+
+We should also apply these changes in the routes:
+
+```ruby
+  namespace 'v1', defaults: { format: 'json' } do
+    resources :tasks, only: [:index, :create, :update, :destroy]
+    resources :users, only: [:create]
+  end
+```
+
+## User authentication
+
+For a faster and easier authentication we will use a gem called devise.
+
+r g devise:install
+r g devise User
+
+fazer o sessions
+
+config.token_authentication_key = :auth_token
+
+protect_from_forgery with: :null_session
+
+params.permit(:name, :email, :password)
+
+validates :name, presence: :true
+
+render json: @user.as_json.merge!(authentication_token: @user.authentication_token)
+
+before_save :ensure_authentication_token

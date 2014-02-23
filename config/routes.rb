@@ -1,7 +1,15 @@
 Todo::Application.routes.draw do
-  resources :users, defaults: { format: 'json' }
-
   root 'welcome#index'
+
+  resources :tasks
+  resources :users
+
+  namespace 'v1', defaults: { format: 'json' } do
+    devise_for :users, controllers: { sessions: 'v1/sessions' }
+
+    resources :tasks, only: [:index, :create, :update, :destroy]
+    resources :users, only: [:create]
+  end
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
