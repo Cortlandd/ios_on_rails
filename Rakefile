@@ -3,4 +3,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-IosOnRails::Application.load_tasks
+Todo::Application.load_tasks

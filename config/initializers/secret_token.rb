@@ -9,4 +9,4 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-IosOnRails::Application.config.secret_key_base = '981b031121d93cd2626ef8ac8aaa2666106b86c0e8d641fcb0b06f2bf95b5f9e920fc4744f33a6e3938f85f991af7e1e1074dbcc6395429780d3ea0edf2edcc8'
+Todo::Application.config.secret_key_base = '981b031121d93cd2626ef8ac8aaa2666106b86c0e8d641fcb0b06f2bf95b5f9e920fc4744f33a6e3938f85f991af7e1e1074dbcc6395429780d3ea0edf2edcc8'
