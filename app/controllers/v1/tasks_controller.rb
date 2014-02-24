@@ -1,5 +1,6 @@
 class V1::TasksController < ApplicationController
   before_filter :authenticate_user!
+
   before_action :set_task, only: [:show, :edit, :update, :destroy]
 
   respond_to :json
@@ -48,6 +49,6 @@ class V1::TasksController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def task_params
-    params.permit(:title, :completed, :user_id)
+    params.require(:task).permit(:title, :completed, :user_id)
   end
 end
