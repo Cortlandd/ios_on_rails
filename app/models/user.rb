@@ -1,4 +1,6 @@
 class User < ActiveRecord::Base
+  has_many :tasks, dependent: :destroy
+
   before_save :ensure_authentication_token
 
   # Include default devise modules. Others available are:

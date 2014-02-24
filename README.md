@@ -244,9 +244,88 @@ If you access `localhost:3000/tasks` you'll see that there is already the HTML v
 
 ## The Rails console and Active Record ORM
 
-Active Record let's you
+Object-Relational Mapping, commonly referred to as its abbreviation ORM, is a technique that connects the rich objects of an application to tables in a relational database management system. Using ORM, the properties and relationships of the objects in an application can be easily stored and retrieved from a database without writing SQL statements directly and with less overall database access code.
 
-#### Namespacing the API
+Active Record is the Rails ORM, and is also loaded when you run the rails console. When you run the command `rails console` all your development environment is loaded, so you can also test any code that you've written.
+
+Start by launching the rails console:
+
+```
+rails console
+```
+
+> **Note**: once again, you can just type `rails c`. You should see a prompt ending in something like `:001 >`.
+
+We can now use Active Record to do the CRUD operations we've seen above without having to write SQL. Rails will output the performed query and then output the result. Lets try to find how many users are "registered" in your app:
+
+```ruby
+User.count
+```
+
+Now let's see who was our first and last "registered" user.
+
+```ruby
+User.last
+User.first
+```
+
+If you look closely you will see that the records are already ordered by `id`.
+You can also perform `WHERE`, `ORDER`, `JOINS` and almost anything you can think of doing with SQL with the help of some syntatic sugar given by Active Record. For example, you can search for users called John:
+
+```ruby
+User.find_by(name: 'John')
+User.where(name: 'John').count # count them
+```
+
+> **Note**: as you can see, first we have used the `where` method, but to find a specific User we used `find`, more precisely `find_by`. This is because `where` will return an active record association, which is basically an array of users, even if only one is found, and `find` or `find_by` will return an instance of User, even if it finds more than one.
+
+#### Model associations
+
+Associations between models make common operations simpler and easier in your code. We already have User and Task models and we created an `user_id` field on tasks to identify the user that created that task. So if we want to get the tasks for the user 1 we must write:
+
+```ruby
+Task.where(user_id: 1)
+```
+
+Or if we wanted to delete user and all the tasks for that user:
+
+```ruby
+@user = User.find(1)
+tasks = Task.where(user_id: @user.id)
+tasks.each do |task|
+  task.destroy
+end
+@user.destroy
+```
+
+With Active Record associations, we can streamline these — and other — operations by declaratively telling Rails that there is a connection between the two models. Here's the revised code for setting up users and tasks:
+
+```ruby
+class User < ActiveRecord::Base
+  has_many :tasks, dependent: :destroy
+end
+
+class Task < ActiveRecord::Base
+  belongs_to :user
+end
+```
+
+Now if we want to get all tasks for a given user we can write:
+
+```ruby
+@user = User.find(1)
+@user.tasks
+```
+
+To create a new task:
+
+```ruby
+@user.tasks.create(title: 'New task by association!')
+```
+
+You can learn more about Active Record associations [here](http://guides.rubyonrails.org/association_basics.html).
+
+## Namespacing the API
 
 Our mobile application will only use the JSON routes to communicate. Usually you don't want to expose the same actions for frontend or backoffice HTML pages and the JSON API. That's where namespacing can help you out.
 
@@ -276,10 +355,43 @@ We should also apply these changes in the routes:
 
 ## User authentication
 
-For a faster and easier authentication we will use a gem called devise.
+User authentication is often a requisite on web applications. For a faster and easier authentication system we will use a gem called devise.
 
-r g devise:install
-r g devise User
+To install it we must add the gem dependency on our `Gemfile`. Just add this line:
+
+```ruby
+gem 'devise'
+```
+
+Then you must run the `bundle install` command inside the project directory. This command will check for new gem dependencies that you added on `Gemfile` and install them.
+
+Once finished you can now use a devise generator (remember the generators are run with `rails generate`) to install the configuration files:
+
+```
+rails g devise:install
+```
+
+And then another one to generate some code on our user model:
+
+```
+rails g devise User
+```
+
+This last command will also create a new migration to add some missing fields to our user (`email`, `encrypted_password`, etc.). You should go ahead and change that migration because our authentication will be done with an authentication token rather than sessions, like in normal web applications.
+
+Uncomment this line:
+
+```
+# add_index :users, :authentication_token, :unique => true
+```
+
+> **Note**: by now you should be aware that comments in ruby are done with the '#' character.
+
+Edit `config/initializers/devise.rb` and also uncomment the line with the `config.token_authentication_key` configuration. It should be like this:
+
+```
+config.token_authentication_key = :authentication_token
+```
 
 fazer o sessions
 
