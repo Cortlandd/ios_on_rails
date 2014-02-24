@@ -540,11 +540,14 @@ If you wish to learn more about Ruby on Rails and everything that we covered in 
 - [Rails Casts](http://railscasts.com/)
 A nice place to watch quick, free and well explained tutorials. The paid tutorials are for more advanced techniques, but the for now, the freebies will do the job.
 
+- [Rails for Zombies](http://railsforzombies.org/)
+A nice introduction to ruby on rails lectured by Gregg Pollack, an expert rubyist.
+
 - [Rubygems](http://rubygems.org/)
-Where the hell are coming my gems? Unless you explicitly say that you are using git or another host, this is where bundler and gem will look for the gems.
+Where the hell are coming my gems from? Unless you explicitly say that you are using git or another host, this is where bundler and gem will look for the gems.
 
 - [Ruby Toolbox](https://www.ruby-toolbox.com/)
-Ruby gems is more a repository with search, Ruby Toolbox helps you find your gems by category and much more.
+Ruby gems is a repository with search, Ruby Toolbox helps you find your gems by category and much more.
 
 - [Rails Guides](http://guides.rubyonrails.org/)
 Everything you need to know about Ruby on Rails.
