@@ -517,10 +517,7 @@ def index
   render json: @tasks
 end
 ```
-By know you probably know what this does.
-You should also fix the create task so the current user gets associated to the class.
-
-This is done by changing your `tasks#create`:
+You should also fix the `create` method so the current user gets associated to the class. This is done by changing your `tasks#create`:
 
 ```ruby
 def create
@@ -534,4 +531,4 @@ def create
 end
 ```
 
-And thats it, your API is ready to be used by your mobile app, that you'll programming pretty soon :)
+And thats it, your API is ready to be used by your mobile app, that you'll be programming pretty soon :)
