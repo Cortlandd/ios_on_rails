@@ -1,12 +1,10 @@
 class V1::SessionsController < ::Devise::SessionsController
-  respond_to :json
-
   def create
     @user = User.where(user_params).first
 
     if @user.valid_password?(params[:user][:password])
       @user.authentication_token = ''
-      @user.ensure_authentication_token
+      @user.save
       render json: @user.as_json.merge(authentication_token: @user.authentication_token)
     else
       render json: 'Unauthorized', status: :unauthorized

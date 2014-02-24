@@ -317,7 +317,7 @@ Now if we want to get all tasks for a given user we can write:
 @user.tasks
 ```
 
-To create a new task:
+To create a new task associated to that user:
 
 ```ruby
 @user.tasks.create(title: 'New task by association!')
@@ -393,16 +393,111 @@ Edit `config/initializers/devise.rb` and also uncomment the line with the `confi
 config.token_authentication_key = :authentication_token
 ```
 
-fazer o sessions
+On our User model add `:token_authenticatable` to the list of devise modules already listed and add a method to change the authentication_token every time the user is saved. Your user model should be something like this:
 
-config.token_authentication_key = :auth_token
+```ruby
+class User < ActiveRecord::Base
+  has_many :tasks, dependent: :destroy
 
+  before_save :ensure_authentication_token
+
+  # Include default devise modules. Others available are:
+  # :token_authenticatable, :confirmable,
+  # :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable, :token_authenticatable
+end
+```
+
+#### Custom sessions and registrations
+
+This step is not trivial, so just get the code below for your session and registration handling. The tutor will briefly describe what's going on on each file.
+
+For sessions handling create `sessions_controller.rb` under `app/controllers/v1` with this content:
+
+```ruby
+class V1::SessionsController < ::Devise::SessionsController
+  def create
+    @user = User.where(user_params).first
+
+    if @user.valid_password?(params[:user][:password])
+      @user.authentication_token = ''
+      @user.save
+      render json: @user.as_json.merge(authentication_token: @user.authentication_token)
+    else
+      render json: 'Unauthorized', status: :unauthorized
+    end
+  end
+
+  def destroy
+    current_user.authentication_token = nil
+    super
+  end
+
+  protected
+
+  def verified_request?
+    request.content_type == 'application/json' || super
+  end
+
+  def user_params
+    params.require(:user).permit(:name, :email)
+  end
+end
+```
+
+For registration handling create `registrations_controller.rb` under `app/controllers/v1` with this content:
+
+```ruby
+class V1::RegistrationsController < Devise::RegistrationsController
+  prepend_before_filter :require_no_authentication, only: [:create]
+
+  def create
+    @user = User.new(user_params)
+
+    if @user.save
+      render json: @user.as_json.merge(authentication_token: @user.authentication_token), status: :created
+    else
+      warden.custom_failure!
+      render json: @user.errors, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def user_params
+    params.require(:user).permit(:name, :email, :password)
+  end
+end
+```
+
+On your `routes.rb` file you can see that devise added a `devise_for :users` but we also need to insert it inside the namespace and give it our custom sessions controller:
+
+```ruby
+  namespace 'v1', defaults: { format: 'json' } do
+    devise_for :users, controllers: { sessions: 'v1/sessions' }
+    resources :tasks, only: [:index, :create, :update, :destroy]
+    resources :users, only: [:create]
+  end
+```
+
+Last thing we want to do is change our `application_controller.rb` and change the `protect_from_forgery` line. Read the comment on that controller and you should know what to do:
+
+```ruby
 protect_from_forgery with: :null_session
+```
 
-params.permit(:name, :email, :password)
+## Final tweaks
+
+We now have our application almost full functional and ready to respond
 
 validates :name, presence: :true
 
 render json: @user.as_json.merge!(authentication_token: @user.authentication_token)
 
 before_save :ensure_authentication_token
+
+  def index
+    @tasks = Task.all
+    render json: @tasks
+  end

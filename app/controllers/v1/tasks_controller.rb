@@ -1,13 +1,11 @@
 class V1::TasksController < ApplicationController
-  #before_filter :authenticate_user!
+  before_filter :authenticate_v1_user!
 
   before_action :set_task, only: [:show, :edit, :update, :destroy]
 
-  respond_to :json
-
   def index
     @tasks = Task.all
-    respond_with @tasks
+    render json: @tasks
   end
 
   def create
