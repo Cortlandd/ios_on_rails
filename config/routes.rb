@@ -3,9 +3,11 @@ Todo::Application.routes.draw do
 
   resources :tasks
   resources :users
+
   devise_for :users, controllers: { sessions: 'v1/sessions' }
 
   namespace 'v1', defaults: { format: 'json' } do
+    devise_for :users, controllers: { sessions: 'v1/sessions' }
     resources :tasks, only: [:index, :create, :update, :destroy]
     resources :users, only: [:create]
   end
