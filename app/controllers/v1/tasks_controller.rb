@@ -4,14 +4,14 @@ class V1::TasksController < ApplicationController
   before_action :set_task, only: [:show, :edit, :update, :destroy]
 
   def index
-    @tasks = Task.all
+    @tasks = current_user.tasks
     render json: @tasks
   end
 
   def create
-    @task = Task.new(task_params)
+    @task = current_user.tasks.create(task_params)
 
-    if @task.save
+    if @task
       render json: @task
     else
       render json: @task.errors, status: :unprocessable_entity

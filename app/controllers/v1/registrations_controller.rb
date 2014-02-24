@@ -5,7 +5,7 @@ class V1::RegistrationsController < Devise::RegistrationsController
     @user = User.new(user_params)
 
     if @user.save
-      render json: @user.as_json.merge(authentication_token: @user.authentication_token), status: :created
+      render json: @user.as_json.merge(teste: true, authentication_token: @user.authentication_token), status: :created
     else
       warden.custom_failure!
       render json: @user.errors, status: :unprocessable_entity

@@ -483,11 +483,11 @@ end
 On your `routes.rb` file you can see that devise added a `devise_for :users` but we also need to insert it inside the namespace and give it our custom sessions controller:
 
 ```ruby
-  namespace 'v1', defaults: { format: 'json' } do
-    devise_for :users, controllers: { sessions: 'v1/sessions' }
-    resources :tasks, only: [:index, :create, :update, :destroy]
-    resources :users, only: [:create]
-  end
+namespace 'v1', defaults: { format: 'json' } do
+  devise_for :users, controllers: { sessions: 'v1/sessions' }
+  resources :tasks, only: [:index, :create, :update, :destroy]
+  resources :users, only: [:create]
+end
 ```
 
 Our tasks controller will be the one needing authentication. For that we just have to add this line:
@@ -504,8 +504,34 @@ protect_from_forgery with: :null_session
 
 ## Final tweaks
 
-We now have our application almost fully functional and ready to respond to our mobile but you may have noticed that every user can get every task. We should only retrieve the tasks for the authenticated user.
+We now have our application almost fully functional and ready to respond to our mobile app but you may have noticed that every user can get every task. We should only retrieve the tasks for the authenticated user.
+For this, you need to change your TasksController in order to respond according to the user.
 
-render json: @user.as_json.merge!(authentication_token: @user.authentication_token)
+By having the `before_filter :authenticate_v1_user!` callback in the top of your controller, you now have access to the `current_user` that is exactly what you need to this job.
 
-validates :name, presence: :true
+So, change your `tasks#index` to:
+
+```ruby
+def index
+  @tasks = current_user.tasks
+  render json: @tasks
+end
+```
+By know you probably know what this does.
+You should also fix the create task so the current user gets associated to the class.
+
+This is done by changing your `tasks#create`:
+
+```ruby
+def create
+  @task = current_user.tasks.create(task_params)
+
+  if @task
+    render json: @task
+  else
+    render json: @task.errors, status: :unprocessable_entity
+  end
+end
+```
+
+And thats it, your API is ready to be used by your mobile app, that you'll programming pretty soon :)
