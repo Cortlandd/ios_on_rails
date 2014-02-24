@@ -2,7 +2,7 @@ Todo::Application.routes.draw do
   root 'welcome#index'
 
   resources :tasks
-  resources :users
+  resources :users, defaults: { format: 'json' }
 
   #devise_for :users, controllers: { sessions: 'v1/sessions' }
 

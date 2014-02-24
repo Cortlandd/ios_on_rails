@@ -12,6 +12,8 @@ Here is the list of preferred software for this workshop:
 
 * **Web browser** — Your backoffice will be visible on one of these. Preferably Chrome.
 
+* **REST client** - Where you can send the requests to the API — [Cocoa REST Client](http://mmattozzi.github.io/cocoa-rest-client/)
+
 ## Rails MVC
 
 Before moving forward it's important that you get used to Rails architecture. [MVC](http://en.wikipedia.org/wiki/Model%E2%80%93View%E2%80%93Controller) is a software architecture, or a pattern used in software engineering, seeking to separate content, presentation, and behavior.
@@ -379,13 +381,20 @@ rails g devise User
 
 This last command will also create a new migration to add some missing fields to our user (`email`, `encrypted_password`, etc.). You should go ahead and change that migration because our authentication will be done with an authentication token rather than sessions, like in normal web applications.
 
-Uncomment this line:
+Uncomment this lines:
 
 ```
+# t.string :authentication_token
 # add_index :users, :authentication_token, :unique => true
 ```
 
 > **Note**: by now you should be aware that comments in ruby are done with the '#' character.
+
+Run the devise user migration:
+
+```
+rake db:migrate
+```
 
 Edit `config/initializers/devise.rb` and also uncomment the line with the `config.token_authentication_key` configuration. It should be like this:
 
@@ -481,6 +490,12 @@ On your `routes.rb` file you can see that devise added a `devise_for :users` but
   end
 ```
 
+Our tasks controller will be the one needing authentication. For that we just have to add this line:
+
+```ruby
+before_filter :authenticate_v1_user!
+```
+
 Last thing we want to do is change our `application_controller.rb` and change the `protect_from_forgery` line. Read the comment on that controller and you should know what to do:
 
 ```ruby
@@ -489,15 +504,8 @@ protect_from_forgery with: :null_session
 
 ## Final tweaks
 
-We now have our application almost full functional and ready to respond
-
-validates :name, presence: :true
+We now have our application almost fully functional and ready to respond to our mobile but you may have noticed that every user can get every task. We should only retrieve the tasks for the authenticated user.
 
 render json: @user.as_json.merge!(authentication_token: @user.authentication_token)
 
-before_save :ensure_authentication_token
-
-  def index
-    @tasks = Task.all
-    render json: @tasks
-  end
+validates :name, presence: :true
