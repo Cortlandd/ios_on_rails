@@ -439,7 +439,7 @@ class V1::SessionsController < ::Devise::SessionsController
   end
 
   def destroy
-    current_user.authentication_token = nil
+    current_v1_user.authentication_token = nil
     super
   end
 
@@ -507,13 +507,13 @@ protect_from_forgery with: :null_session
 We now have our application almost fully functional and ready to respond to our mobile app but you may have noticed that every user can get every task. We should only retrieve the tasks for the authenticated user.
 For this, you need to change your TasksController in order to respond according to the user.
 
-By having the `before_filter :authenticate_v1_user!` callback in the top of your controller, you now have access to the `current_user` that is exactly what you need to this job.
+By having the `before_filter :authenticate_v1_user!` callback in the top of your controller, you now have access to the `current_v1_user` that is exactly what you need to this job.
 
 So, change your `tasks#index` to:
 
 ```ruby
 def index
-  @tasks = current_user.tasks
+  @tasks = current_v1_user.tasks
   render json: @tasks
 end
 ```
@@ -521,7 +521,7 @@ You should also fix the `create` method so the current user gets associated to t
 
 ```ruby
 def create
-  @task = current_user.tasks.create(task_params)
+  @task = current_v1_user.tasks.create(task_params)
 
   if @task
     render json: @task

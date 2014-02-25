@@ -2,7 +2,7 @@ class V1::SessionsController < ::Devise::SessionsController
   def create
     @user = User.where(user_params).first
 
-    if @user.valid_password?(params[:user][:password])
+    if @user && @user.valid_password?(params[:user][:password])
       @user.authentication_token = ''
       @user.save
       render json: @user.as_json.merge(authentication_token: @user.authentication_token)

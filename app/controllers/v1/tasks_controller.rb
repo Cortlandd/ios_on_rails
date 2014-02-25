@@ -4,12 +4,12 @@ class V1::TasksController < ApplicationController
   before_action :set_task, only: [:show, :edit, :update, :destroy]
 
   def index
-    @tasks = current_user.tasks
+    @tasks = current_v1_user.tasks
     render json: @tasks
   end
 
   def create
-    @task = current_user.tasks.create(task_params)
+    @task = current_v1_user.tasks.create(task_params)
 
     if @task
       render json: @task
