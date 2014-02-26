@@ -362,7 +362,7 @@ User authentication is often a requisite on web applications. For a faster and e
 To install it we must add the gem dependency on our `Gemfile`. Just add this line:
 
 ```ruby
-gem 'devise'
+gem 'devise', '3.0.0' # don't install the most recent one
 ```
 
 Then you must run the `bundle install` command inside the project directory. This command will check for new gem dependencies that you added on `Gemfile` and install them.

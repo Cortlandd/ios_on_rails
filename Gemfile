@@ -28,7 +28,7 @@ gem 'turbolinks'
 gem 'jbuilder', '~> 1.2'
 
 # For authentication
-gem 'devise'
+gem 'devise', '3.0.0'
 
 # For heroku deployment
 group :production do
